@@ -1,0 +1,15 @@
+project_id = "woomkqemmeengrcvjoff"
+
+[api]
+port = 54321
+external_url = "http://localhost:54321"
+
+[db]
+port = 54322
+
+[auth]
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["https://swarna-client.railway.app"]
+
+[storage]
+enabled = false
