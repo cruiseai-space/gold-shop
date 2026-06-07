@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { useLogs } from './useLogs.js';
 import { formatDate } from '../../utils/formatters.js';
+import { TableSkeleton } from '../../components/ui/Skeleton.jsx';
+import { EmptyState } from '../../components/ui/EmptyState.jsx';
 
 export function LogsPage() {
   const [filters, setFilters] = useState({ page: 1 });
@@ -37,15 +39,15 @@ export function LogsPage() {
             </thead>
             <tbody className="divide-y divide-border">
               {isLoading ? (
-                [...Array(10)].map((_, i) => (
-                  <tr key={i} className="animate-pulse">
-                    <td colSpan="5" className="px-4 py-4 h-12 bg-ink/5"></td>
-                  </tr>
-                ))
+                <TableSkeleton rows={10} cols={5} />
               ) : data?.data?.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-4 py-12 text-center text-ink-muted italic">
-                    No logs found
+                  <td colSpan="5" className="px-4 py-12">
+                    <EmptyState 
+                      icon="📜"
+                      title="Audit trail is empty"
+                      message="All system actions will be logged here automatically."
+                    />
                   </td>
                 </tr>
               ) : (

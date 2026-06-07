@@ -5,6 +5,8 @@ import { InviteUserModal } from './InviteUserModal.jsx';
 import { useAuth } from '../auth/AuthProvider.jsx';
 import { ROLES } from '../../constants/roles.js';
 import { formatDate } from '../../utils/formatters.js';
+import { TableSkeleton } from '../../components/ui/Skeleton.jsx';
+import { EmptyState } from '../../components/ui/EmptyState.jsx';
 
 export function SettingsPage() {
   const { user: currentUser } = useAuth();
@@ -63,9 +65,19 @@ export function SettingsPage() {
             </thead>
             <tbody className="divide-y divide-border">
               {isLoading ? (
-                [...Array(3)].map((_, i) => <tr key={i} className="h-16 animate-pulse bg-ink/5"></tr>)
+                <TableSkeleton rows={3} cols={5} />
+              ) : !users?.data || users.data.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="px-4 py-12">
+                    <EmptyState 
+                      icon="👥"
+                      title="No users found"
+                      message="Invite your staff members to get started."
+                    />
+                  </td>
+                </tr>
               ) : (
-                users?.data?.map((user) => (
+                users.data.map((user) => (
                   <tr key={user.id} className="hover:bg-ink/5 transition-colors">
                     <td className="px-4 py-4">
                       <p className="font-medium text-ink">{user.full_name}</p>

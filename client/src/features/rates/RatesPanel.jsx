@@ -7,6 +7,8 @@ import { useRates, useTodayRate, useCreateRate } from './useRates.js';
 import { formatCurrency, formatDate } from '../../utils/formatters.js';
 import { useAuth } from '../auth/AuthProvider.jsx';
 import { ROLES } from '../../constants/roles.js';
+import { Skeleton, TableSkeleton } from '../../components/ui/Skeleton.jsx';
+import { EmptyState } from '../../components/ui/EmptyState.jsx';
 
 const rateSchema = z.object({
   marketRate: z.coerce.number().positive('Must be positive'),
@@ -106,9 +108,17 @@ export function RatesPanel() {
             </thead>
             <tbody className="divide-y divide-border">
               {isListLoading ? (
-                [...Array(5)].map((_, i) => <tr key={i} className="h-12 animate-pulse bg-ink/5"></tr>)
+                <TableSkeleton rows={8} cols={4} />
               ) : rates?.data?.length === 0 ? (
-                <tr><td colSpan="4" className="px-4 py-8 text-center text-ink-muted italic">No rates recorded</td></tr>
+                <tr>
+                  <td colSpan="4" className="px-4 py-12">
+                    <EmptyState 
+                      icon="📈"
+                      title="No rate history"
+                      message="Historical gold rates will appear here as you set them daily."
+                    />
+                  </td>
+                </tr>
               ) : (
                 rates?.data?.map((r) => (
                   <tr key={r.id} className="hover:bg-primary-subtle/10 transition-colors">

@@ -5,6 +5,8 @@ import { formatCurrency, formatWeight, formatPercent, formatDate } from '../../u
 import { PurchaseFormDrawer } from './PurchaseFormDrawer.jsx';
 import { useAuth } from '../auth/AuthProvider.jsx';
 import { ROLES } from '../../constants/roles.js';
+import { TableSkeleton } from '../../components/ui/Skeleton.jsx';
+import { EmptyState } from '../../components/ui/EmptyState.jsx';
 
 export function PurchasesPage() {
   const { user } = useAuth();
@@ -94,15 +96,15 @@ export function PurchasesPage() {
             </thead>
             <tbody className="divide-y divide-border">
               {isLoading ? (
-                [...Array(5)].map((_, i) => (
-                  <tr key={i} className="animate-pulse">
-                    <td colSpan="7" className="px-4 py-4 h-12 bg-ink/5"></td>
-                  </tr>
-                ))
+                <TableSkeleton rows={8} cols={7} />
               ) : data?.data?.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-4 py-12 text-center text-ink-muted italic">
-                    No purchases found
+                  <td colSpan="7" className="px-4 py-12">
+                    <EmptyState 
+                      icon="⚖️"
+                      title="No purchases recorded"
+                      message="Start by recording your first gold purchase entry using the button above."
+                    />
                   </td>
                 </tr>
               ) : (
