@@ -34,3 +34,32 @@ export async function log({ userId, actionType, entityType = null, entityId = nu
     // We don't throw here to avoid failing the main transaction if logging fails
   }
 }
+
+/**
+ * List audit logs with pagination and filters.
+ */
+export async function listLogs({ page = 1, limit = 50, userId, actionType, dateFrom, dateTo }) {
+  let query = supabase
+    .from('audit_logs')
+    .select('*', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range((page - 1) * limit, page * limit - 1);
+
+  if (userId)     query = query.eq('user_id', userId);
+  if (actionType) query = query.eq('action_type', actionType);
+  if (dateFrom)   query = query.gte('created_at', dateFrom);
+  if (dateTo)     query = query.lte('created_at', dateTo);
+
+  const { data, error, count } = await query;
+  if (error) throw new Error(`DB_ERROR: ${error.message}`);
+  
+  return { 
+    data, 
+    meta: { 
+      page, 
+      limit, 
+      total: count,
+      pages: Math.ceil(count / limit)
+    } 
+  };
+}

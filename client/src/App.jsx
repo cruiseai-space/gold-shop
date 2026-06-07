@@ -3,6 +3,8 @@ import { AuthProvider } from './features/auth/AuthProvider.jsx';
 import { ProtectedRoute } from './components/layout/ProtectedRoute.jsx';
 import { LoginPage } from './features/auth/LoginPage.jsx';
 import { PurchasesPage } from './features/purchases/PurchasesPage.jsx';
+import { RatesPanel } from './features/rates/RatesPanel.jsx';
+import { LogsPage } from './features/logs/LogsPage.jsx';
 import { AppShell } from './components/layout/AppShell.jsx';
 
 function Placeholder({ title }) {
@@ -37,7 +39,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <AppShell>
-                  <Placeholder title="Rates Management" />
+                  <RatesPanel />
                 </AppShell>
               </ProtectedRoute>
             } 
@@ -48,7 +50,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <AppShell>
-                  <Placeholder title="Audit Logs" />
+                  <LogsPage />
                 </AppShell>
               </ProtectedRoute>
             } 
