@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import routes from './routes/index.js';
 import { errorHandler } from './middleware/error.middleware.js';
 import { ApiError } from './utils/ApiError.js';
 
@@ -26,6 +27,8 @@ app.get('/health', (req, res) => {
 });
 
 // Root API
+app.use('/api', routes);
+
 app.get('/api', (req, res) => {
   res.json({ message: 'Swarna Ledger API v1' });
 });
