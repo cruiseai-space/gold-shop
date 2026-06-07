@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './features/auth/AuthProvider.jsx';
 import { ProtectedRoute } from './components/layout/ProtectedRoute.jsx';
 import { LoginPage } from './features/auth/LoginPage.jsx';
+import { SignupPage } from './features/auth/SignupPage.jsx';
 import { PurchasesPage } from './features/purchases/PurchasesPage.jsx';
 import { RatesPanel } from './features/rates/RatesPanel.jsx';
 import { LogsPage } from './features/logs/LogsPage.jsx';
@@ -23,6 +24,7 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
           
           <Route 
             path="/" 

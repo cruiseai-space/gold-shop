@@ -7,6 +7,34 @@ import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 /**
+ * Register a new user using Supabase Auth.
+ */
+export const signup = asyncHandler(async (req, res) => {
+  const { email, password, fullName } = req.body;
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        full_name: fullName,
+        role: 'OWNER', // Default to OWNER for first signup, or adjust as needed
+      }
+    }
+  });
+
+  if (error) {
+    throw new ApiError(400, 'SIGNUP_FAILED', error.message);
+  }
+
+  res.status(201).json({ 
+    success: true, 
+    message: 'User registered successfully. Please check your email for confirmation.',
+    data: { user: data.user }
+  });
+});
+
+/**
  * Login user using Supabase Auth and issue custom JWT.
  */
 export const login = asyncHandler(async (req, res) => {
