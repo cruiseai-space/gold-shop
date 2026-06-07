@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, dev]
+  push:
+    branches: [main, dev]
+
+jobs:
+  test-client:
+    name: Client Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+
+      - run: npm ci
+      - run: npm run test:run
+
+  test-server:
+    name: Server Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+
+    env:
+      JWT_SECRET: test-secret-for-ci-only-not-real
+      NODE_ENV: test
+      SUPABASE_URL: https://placeholder.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: placeholder
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - run: npm ci
+      - run: npm run test:run
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: cd client && npm ci && npm run lint
+      - run: cd server && npm ci && npm run lint
