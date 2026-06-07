@@ -5,6 +5,7 @@ import { LoginPage } from './features/auth/LoginPage.jsx';
 import { PurchasesPage } from './features/purchases/PurchasesPage.jsx';
 import { RatesPanel } from './features/rates/RatesPanel.jsx';
 import { LogsPage } from './features/logs/LogsPage.jsx';
+import { SettingsPage } from './features/settings/SettingsPage.jsx';
 import { AppShell } from './components/layout/AppShell.jsx';
 
 function Placeholder({ title }) {
@@ -61,7 +62,7 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['OWNER']}>
                 <AppShell>
-                  <Placeholder title="Settings" />
+                  <SettingsPage />
                 </AppShell>
               </ProtectedRoute>
             } 

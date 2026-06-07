@@ -1,0 +1,70 @@
+// server/src/controllers/users.controller.js
+import * as usersService from '../services/users.service.js';
+import * as logsService from '../services/logs.service.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
+
+/**
+ * GET /api/users
+ */
+export const list = asyncHandler(async (req, res) => {
+  const users = await usersService.listUsers();
+  res.json({ success: true, data: users });
+});
+
+/**
+ * POST /api/users/invite
+ */
+export const invite = asyncHandler(async (req, res) => {
+  const invitedUser = await usersService.inviteUser(req.body, req.user.id);
+  
+  await logsService.log({
+    userId: req.user.id,
+    actionType: 'INVITE_USER',
+    entityType: 'user',
+    entityId: invitedUser.id,
+    payloadAfter: { email: req.body.email, role: req.body.role },
+    ipAddress: req.ip
+  });
+
+  res.status(201).json({ success: true, data: invitedUser });
+});
+
+/**
+ * PATCH /api/users/:id/role
+ */
+export const updateRole = asyncHandler(async (req, res) => {
+  const original = await usersService.getProfile(req.params.id);
+  const updated = await usersService.updateRole(req.params.id, req.body.role, req.user.id);
+  
+  await logsService.log({
+    userId: req.user.id,
+    actionType: 'UPDATE_USER_ROLE',
+    entityType: 'user',
+    entityId: updated.id,
+    payloadBefore: { role: original.role },
+    payloadAfter: { role: updated.role },
+    ipAddress: req.ip
+  });
+
+  res.json({ success: true, data: updated });
+});
+
+/**
+ * PATCH /api/users/:id/status
+ */
+export const setStatus = asyncHandler(async (req, res) => {
+  const original = await usersService.getProfile(req.params.id);
+  const updated = await usersService.setStatus(req.params.id, req.body.isActive, req.user.id);
+  
+  await logsService.log({
+    userId: req.user.id,
+    actionType: 'DEACTIVATE_USER',
+    entityType: 'user',
+    entityId: updated.id,
+    payloadBefore: { is_active: original.is_active },
+    payloadAfter: { is_active: updated.is_active },
+    ipAddress: req.ip
+  });
+
+  res.json({ success: true, data: updated });
+});
