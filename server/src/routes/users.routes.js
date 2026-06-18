@@ -10,6 +10,7 @@ const router = Router();
 router.use(authenticate, requireRole(['OWNER']));
 
 router.get('/', usersController.list);
+router.get('/invites', usersController.listInvites);
 router.post('/invite', usersController.invite);
 router.patch('/:id/role', usersController.updateRole);
 router.patch('/:id/status', usersController.setStatus);

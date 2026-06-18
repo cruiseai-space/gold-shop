@@ -5,3 +5,5 @@ export const signup = (data) => apiClient.post('/auth/signup', data);
 export const login = (credentials) => apiClient.post('/auth/login', credentials);
 export const logout = () => apiClient.post('/auth/logout');
 export const getMe = () => apiClient.get('/auth/me');
+export const forgotPassword = (email) => apiClient.post('/auth/forgot-password', { email });
+export const resetPassword = (accessToken, newPassword) => apiClient.post('/auth/reset-password', { accessToken, newPassword });

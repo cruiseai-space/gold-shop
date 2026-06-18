@@ -1,0 +1,40 @@
+# render.yaml — Infrastructure as Code for Render.com
+services:
+  # Frontend (Vite static site)
+  - type: web
+    name: swarna-client
+    runtime: static
+    buildCommand: cd client && npm ci && npm run build
+    staticPublishPath: client/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://swarna-server.onrender.com/api
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: VITE_APP_ENV
+        value: production
+
+  # Backend (Node.js Express)
+  - type: web
+    name: swarna-server
+    runtime: node
+    buildCommand: cd server && npm ci
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: CORS_ORIGIN
+        value: https://swarna-client.onrender.com
+    healthCheckPath: /health

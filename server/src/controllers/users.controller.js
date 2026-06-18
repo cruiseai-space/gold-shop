@@ -1,7 +1,9 @@
 // server/src/controllers/users.controller.js
 import * as usersService from '../services/users.service.js';
+import * as inviteService from '../services/invite.service.js';
 import * as logsService from '../services/logs.service.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { ApiError } from '../utils/ApiError.js';
 
 /**
  * GET /api/users
@@ -15,18 +17,31 @@ export const list = asyncHandler(async (req, res) => {
  * POST /api/users/invite
  */
 export const invite = asyncHandler(async (req, res) => {
-  const invitedUser = await usersService.inviteUser(req.body, req.user.id);
+  const canSend = await inviteService.canSendInvite(req.user.id);
+  if (!canSend) {
+    throw new ApiError(429, 'RATE_LIMITED', 'Maximum 3 invites per hour. Please try again later.');
+  }
+
+  const result = await inviteService.createInvite(req.body, req.user.id);
   
   await logsService.log({
     userId: req.user.id,
     actionType: 'INVITE_USER',
     entityType: 'user',
-    entityId: invitedUser.id,
+    entityId: result.authUser.id,
     payloadAfter: { email: req.body.email, role: req.body.role },
     ipAddress: req.ip
   });
 
-  res.status(201).json({ success: true, data: invitedUser });
+  res.status(201).json({ success: true, data: result });
+});
+
+/**
+ * GET /api/users/invites
+ */
+export const listInvites = asyncHandler(async (req, res) => {
+  const invites = await inviteService.listInvites();
+  res.json({ success: true, data: invites });
 });
 
 /**

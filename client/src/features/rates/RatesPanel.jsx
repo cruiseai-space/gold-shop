@@ -9,6 +9,7 @@ import { useAuth } from '../auth/AuthProvider.jsx';
 import { ROLES } from '../../constants/roles.js';
 import { Skeleton, TableSkeleton } from '../../components/ui/Skeleton.jsx';
 import { EmptyState } from '../../components/ui/EmptyState.jsx';
+import { Spinner } from '../../components/ui/Spinner.jsx';
 
 const rateSchema = z.object({
   marketRate: z.coerce.number().positive('Must be positive'),
@@ -77,7 +78,7 @@ export function RatesPanel() {
                 disabled={createMutation.isLoading}
                 className="btn btn-primary w-full"
               >
-                {createMutation.isLoading ? 'Saving...' : 'Save Daily Rate'}
+                {createMutation.isLoading ? <Spinner inline size="sm" variant="gold" message="Setting rate..." /> : 'Save Daily Rate'}
               </button>
             </form>
           )}

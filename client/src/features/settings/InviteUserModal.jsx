@@ -1,8 +1,9 @@
-// client/src/features/settings/InviteUserModal.jsx
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { ROLES } from '../../constants/roles.js';
+import { toast } from 'sonner';
+import { Spinner } from '../../components/ui/Spinner.jsx';
 
 const inviteSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
@@ -23,8 +24,12 @@ export function InviteUserModal({ isOpen, onClose, onSubmit, isSubmitting = fals
   });
 
   const handleFormSubmit = async (data) => {
-    await onSubmit(data);
-    reset();
+    try {
+      await onSubmit(data);
+      reset();
+    } catch (e) {
+      toast.error(e.response?.data?.error?.message || e.message || 'Failed to send invite');
+    }
   };
 
   if (!isOpen) return null;
@@ -64,7 +69,7 @@ export function InviteUserModal({ isOpen, onClose, onSubmit, isSubmitting = fals
           <div className="flex gap-3 pt-4">
             <button type="button" onClick={onClose} className="btn border border-border flex-1">Cancel</button>
             <button type="submit" disabled={isSubmitting} className="btn btn-primary flex-1">
-              {isSubmitting ? 'Sending...' : 'Send Invite'}
+              {isSubmitting ? <Spinner inline size="sm" variant="gold" message="Sending..." /> : 'Send Invite'}
             </button>
           </div>
         </form>

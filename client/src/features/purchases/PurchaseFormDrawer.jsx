@@ -1,14 +1,17 @@
 // client/src/features/purchases/PurchaseFormDrawer.jsx
-import { useEffect, useMemo } from 'react';
-import { useForm } from 'react-hook-form';
+import { useEffect, useMemo, useState, useRef } from 'react';
+import { useForm, useController } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { computeGoldPurchase } from '../../utils/goldCalc.js';
 import { formatCurrency, formatWeight } from '../../utils/formatters.js';
 
+import { useMembers } from '../members/useMembers.js';
+
 const purchaseSchema = z.object({
   purchaseDate: z.string().min(1, 'Date is required'),
-  sellerName: z.string().min(1, 'Seller name is required'),
+  memberId: z.coerce.string().min(1, 'Member is required'),
+  transactionType: z.enum(['BUYING', 'SELLING']),
   cashSource: z.string().optional(),
   grossWeight: z.coerce.number().positive('Must be positive'),
   touchPercent: z.coerce.number().gt(0).lte(100, 'Max 100%'),
@@ -18,11 +21,77 @@ const purchaseSchema = z.object({
   notes: z.string().optional(),
 });
 
+function MemberSelect({ control, name, members, error }) {
+  const { field } = useController({ control, name });
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const wrapperRef = useRef(null);
+
+  const selectedMember = members?.find(m => m.id === field.value);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filteredMembers = members?.filter(m => 
+    m.name.toLowerCase().includes(search.toLowerCase()) || 
+    (m.phone && m.phone.includes(search))
+  );
+
+  return (
+    <div className="relative" ref={wrapperRef}>
+      <input
+        type="text"
+        className="input cursor-text"
+        placeholder="Search member name or phone..."
+        value={isOpen ? search : (selectedMember?.name || '')}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setIsOpen(true);
+          if (field.value) field.onChange(''); // Clear selection if user types
+        }}
+        onFocus={() => setIsOpen(true)}
+      />
+      {isOpen && (
+        <div className="absolute z-50 w-full mt-1 bg-surface border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
+          {filteredMembers?.length === 0 ? (
+            <div className="p-3 text-sm text-ink-muted">No members found.</div>
+          ) : (
+            filteredMembers?.map(m => (
+              <div
+                key={m.id}
+                className="px-3 py-2 cursor-pointer hover:bg-surface-2 transition-colors border-b border-border last:border-0"
+                onClick={() => {
+                  field.onChange(m.id);
+                  setSearch('');
+                  setIsOpen(false);
+                }}
+              >
+                <div className="font-medium text-ink">{m.name}</div>
+                {m.phone && <div className="text-xs text-ink-muted">{m.phone}</div>}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+      {error && <p className="text-xs text-danger mt-1">{error.message}</p>}
+    </div>
+  );
+}
+
 export function PurchaseFormDrawer({ isOpen, onClose, onSubmit, initialData = null, isSubmitting = false }) {
-  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm({
+  const { register, control, handleSubmit, watch, reset, formState: { errors } } = useForm({
     resolver: zodResolver(purchaseSchema),
     defaultValues: initialData || {
       purchaseDate: new Date().toISOString().split('T')[0],
+      memberId: '',
+      transactionType: 'BUYING',
       grossWeight: '',
       touchPercent: '',
       marketRate: '',
@@ -34,6 +103,8 @@ export function PurchaseFormDrawer({ isOpen, onClose, onSubmit, initialData = nu
     if (isOpen) {
       reset(initialData || {
         purchaseDate: new Date().toISOString().split('T')[0],
+        memberId: '',
+        transactionType: 'BUYING',
         grossWeight: '',
         touchPercent: '',
         marketRate: '',
@@ -42,17 +113,20 @@ export function PurchaseFormDrawer({ isOpen, onClose, onSubmit, initialData = nu
     }
   }, [isOpen, initialData, reset]);
 
-  const watchedFields = watch(['grossWeight', 'touchPercent', 'marketRate', 'cashGiven']);
+  const { data: membersData } = useMembers({ page: 1, limit: 1000 });
+
+  const watchedFields = watch(['grossWeight', 'touchPercent', 'marketRate', 'cashGiven', 'transactionType']);
   
   const calculations = useMemo(() => {
-    const [gw, tp, mr, cg] = watchedFields;
+    const [gw, tp, mr, cg, tt] = watchedFields;
     if (gw > 0 && tp > 0 && mr > 0) {
       try {
         return computeGoldPurchase({
           grossWeight: gw,
           touchPercent: tp,
           marketRate: mr,
-          cashGiven: cg || 0
+          cashGiven: cg || 0,
+          transactionType: tt || 'BUYING'
         });
       } catch (e) {
         return null;
@@ -75,15 +149,30 @@ export function PurchaseFormDrawer({ isOpen, onClose, onSubmit, initialData = nu
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex-1">
+            <div className="flex bg-surface-2 p-1 rounded-md mb-4">
+              <label className={`flex-1 text-center py-2 text-sm font-semibold rounded cursor-pointer transition-colors ${watch('transactionType') === 'BUYING' ? 'bg-surface shadow text-primary' : 'text-ink-muted'}`}>
+                <input type="radio" value="BUYING" {...register('transactionType')} className="sr-only" />
+                Buying Gold
+              </label>
+              <label className={`flex-1 text-center py-2 text-sm font-semibold rounded cursor-pointer transition-colors ${watch('transactionType') === 'SELLING' ? 'bg-surface shadow text-amber-600' : 'text-ink-muted'}`}>
+                <input type="radio" value="SELLING" {...register('transactionType')} className="sr-only" />
+                Selling Gold
+              </label>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-semibold uppercase text-ink-muted mb-1">Date</label>
                 <input type="date" {...register('purchaseDate')} className="input" />
               </div>
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-xs font-semibold uppercase text-ink-muted mb-1">Seller Name</label>
-                <input {...register('sellerName')} className="input" placeholder="Muthu" />
-                {errors.sellerName && <p className="text-xs text-danger mt-1">{errors.sellerName.message}</p>}
+                <label className="block text-xs font-semibold uppercase text-ink-muted mb-1">Member</label>
+                <MemberSelect 
+                  control={control} 
+                  name="memberId" 
+                  members={membersData?.data || []} 
+                  error={errors.memberId} 
+                />
               </div>
             </div>
 
@@ -136,7 +225,7 @@ export function PurchaseFormDrawer({ isOpen, onClose, onSubmit, initialData = nu
                 </div>
                 <div className="flex justify-between text-lg pt-2 border-t border-primary/10">
                   <span className="font-display font-semibold">Pending:</span>
-                  <span className={`font-mono font-bold ${calculations.pendingAmount.gt(0) ? 'text-success' : calculations.pendingAmount.lt(0) ? 'text-danger' : 'text-ink-muted'}`}>
+                  <span className={`font-mono font-bold ${calculations.pendingAmount.gt(0) ? (watch('transactionType') === 'SELLING' ? 'text-danger' : 'text-success') : calculations.pendingAmount.lt(0) ? (watch('transactionType') === 'SELLING' ? 'text-success' : 'text-danger') : 'text-ink-muted'}`}>
                     {formatCurrency(calculations.pendingAmount)}
                   </span>
                 </div>

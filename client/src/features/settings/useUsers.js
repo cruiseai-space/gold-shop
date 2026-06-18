@@ -12,16 +12,21 @@ export function useUsers() {
   });
 }
 
+export function useInvites() {
+  return useQuery({
+    queryKey: ['invites'],
+    queryFn: () => usersApi.listInvites(),
+  });
+}
+
 export function useInviteUser() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: usersApi.invite,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ['invites'] });
       toast.success('Invitation sent successfully');
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to send invitation');
     }
   });
 }

@@ -12,6 +12,45 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-display font-semibold;
   }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full hover:bg-ink-muted transition-colors;
+  }
+
+  /* React Datepicker Customizations */
+  .react-datepicker-wrapper {
+    width: auto;
+  }
+  .react-datepicker {
+    @apply font-body bg-surface border-border shadow-lg rounded-lg text-ink;
+    font-size: 0.8rem;
+  }
+  .react-datepicker__header {
+    @apply bg-surface-2 border-border border-b rounded-t-lg pt-2 pb-1;
+  }
+  .react-datepicker__current-month, .react-datepicker-time__header, .react-datepicker-year-header {
+    @apply font-display text-primary text-sm;
+  }
+  .react-datepicker__day-name, .react-datepicker__day, .react-datepicker__time-name {
+    @apply text-ink hover:bg-surface-2 rounded-md transition-colors;
+    width: 1.5rem;
+    line-height: 1.5rem;
+    margin: 0.1rem;
+  }
+  .react-datepicker__day--selected, .react-datepicker__day--in-selecting-range, .react-datepicker__day--in-range, .react-datepicker__month-text--selected, .react-datepicker__month-text--in-selecting-range, .react-datepicker__month-text--in-range, .react-datepicker__quarter-text--selected, .react-datepicker__quarter-text--in-selecting-range, .react-datepicker__quarter-text--in-range, .react-datepicker__year-text--selected, .react-datepicker__year-text--in-selecting-range, .react-datepicker__year-text--in-range {
+    @apply bg-primary text-primary-text hover:bg-primary-hover font-bold;
+  }
+  .react-datepicker__day--keyboard-selected, .react-datepicker__month-text--keyboard-selected, .react-datepicker__quarter-text--keyboard-selected, .react-datepicker__year-text--keyboard-selected {
+    @apply bg-primary-subtle text-primary;
+  }
 }
 
 @layer components {

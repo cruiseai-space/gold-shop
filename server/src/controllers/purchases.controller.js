@@ -7,13 +7,14 @@ import { asyncHandler } from '../utils/asyncHandler.js';
  * GET /api/purchases
  */
 export const list = asyncHandler(async (req, res) => {
-  const { page, limit, dateFrom, dateTo, seller } = req.query;
+  const { page, limit, dateFrom, dateTo, memberId, transactionType } = req.query;
   const result = await purchasesService.listPurchases({
     page: parseInt(page) || 1,
     limit: parseInt(limit) || 20,
     dateFrom,
     dateTo,
-    seller
+    memberId,
+    transactionType
   });
   
   res.json({ success: true, ...result });

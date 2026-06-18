@@ -7,19 +7,21 @@ import Decimal from 'decimal.js';
 /**
  * List purchases with pagination and filters.
  */
-export async function listPurchases({ page = 1, limit = 20, dateFrom, dateTo, seller }) {
+export async function listPurchases({ page = 1, limit = 20, dateFrom, dateTo, memberId, transactionType }) {
   let query = supabase
     .from('purchases')
     .select(`
       *,
-      creator:profiles!purchases_created_by_fkey (id, full_name)
+      creator:profiles!purchases_created_by_fkey (id, full_name),
+      member:members!purchases_member_id_fkey (id, name)
     `, { count: 'exact' })
     .order('purchase_date', { ascending: false })
     .range((page - 1) * limit, page * limit - 1);
 
   if (dateFrom) query = query.gte('purchase_date', dateFrom);
   if (dateTo)   query = query.lte('purchase_date', dateTo);
-  if (seller)   query = query.ilike('seller_name', `%${seller}%`);
+  if (memberId) query = query.eq('member_id', memberId);
+  if (transactionType) query = query.eq('transaction_type', transactionType);
 
   const { data, error, count } = await query;
   if (error) throw new ApiError(500, 'DB_ERROR', error.message);
@@ -43,7 +45,8 @@ export async function getPurchaseById(id) {
     .from('purchases')
     .select(`
       *,
-      creator:profiles!purchases_created_by_fkey (id, full_name)
+      creator:profiles!purchases_created_by_fkey (id, full_name),
+      member:members!purchases_member_id_fkey (id, name)
     `)
     .eq('id', id)
     .single();
@@ -65,13 +68,15 @@ export async function createPurchase(data, userId) {
     touchPercent: data.touchPercent,
     marketRate: data.marketRate,
     cashGiven: data.cashGiven || 0,
+    transactionType: data.transactionType || 'BUYING',
   });
 
   const { data: row, error } = await supabase
     .from('purchases')
     .insert({
       purchase_date:  data.purchaseDate,
-      seller_name:    data.sellerName,
+      member_id:      data.memberId,
+      transaction_type: calc.transactionType,
       cash_source:    data.cashSource || null,
       gross_weight:   calc.grossWeight.toFixed(4),
       touch_percent:  calc.touchPercent.toFixed(4),
@@ -112,14 +117,16 @@ export async function updatePurchase(id, data, user) {
     touchPercent: data.touchPercent !== undefined ? data.touchPercent : existing.touch_percent,
     marketRate:   data.marketRate   !== undefined ? data.marketRate   : existing.market_rate,
     cashGiven:    data.cashGiven    !== undefined ? data.cashGiven    : existing.cash_given,
+    transactionType: data.transactionType !== undefined ? data.transactionType : existing.transaction_type,
   });
 
   const { data: row, error } = await supabase
     .from('purchases')
     .update({
       purchase_date:  data.purchaseDate || existing.purchase_date,
-      seller_name:    data.sellerName   || existing.seller_name,
-      cash_source:    data.cashSource   !== undefined ? data.cash_source : existing.cash_source,
+      member_id:      data.memberId     !== undefined ? data.memberId : existing.member_id,
+      transaction_type: calc.transactionType,
+      cash_source:    data.cashSource   !== undefined ? data.cashSource : existing.cash_source,
       gross_weight:   calc.grossWeight.toFixed(4),
       touch_percent:  calc.touchPercent.toFixed(4),
       pure_weight:    calc.pureWeight.toFixed(4),

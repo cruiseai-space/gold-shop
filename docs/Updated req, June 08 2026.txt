@@ -1,0 +1,9 @@
+Home screen
+Total PL.
+Gold that have come in & went out.
+Date filter, column picker.
+New Screen: Member addition, name, phone number, notes.
+Existing Purchase drawer -> new dropdowns, Member, current purchase(buying, selling)
+Based on member transactions, individual transaction listing screen with P&L, overall gold in & overall gold out.
+
+

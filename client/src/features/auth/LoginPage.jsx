@@ -7,6 +7,7 @@ import { useAuth } from './AuthProvider.jsx';
 import * as authApi from '../../api/auth.js';
 import { toast } from 'sonner';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { Spinner } from '../../components/ui/Spinner.jsx';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -85,8 +86,14 @@ export function LoginPage() {
             disabled={isSubmitting}
             className="btn btn-primary w-full"
           >
-            {isSubmitting ? 'Signing in...' : 'Sign In'}
+            {isSubmitting ? <Spinner inline size="sm" variant="gold" message="Signing in..." /> : 'Sign In'}
           </button>
+
+          <div className="text-center mt-2">
+            <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+              Forgot password?
+            </Link>
+          </div>
 
           <div className="text-center mt-4">
             <p className="text-sm text-ink-muted">

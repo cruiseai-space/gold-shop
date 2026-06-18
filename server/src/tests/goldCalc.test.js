@@ -108,4 +108,45 @@ describe('computeGoldPurchase', () => {
       expect(result.pureValue.isFinite()).toBe(true);
     });
   });
+
+  describe('transactionType: SELLING', () => {
+    it('pending is negative when member owes shop (cashGiven < pureValue)', () => {
+      const result = computeGoldPurchase({
+        grossWeight: 5,
+        touchPercent: 80.75,
+        marketRate: 9500,
+        cashGiven: 30000,
+        transactionType: 'SELLING',
+      });
+      // basePending = 38356.25 - 30000 = 8356.25
+      // pending = -8356.25
+      expect(result.pendingAmount.toFixed(2)).toBe('-8356.25');
+      expect(result.transactionType).toBe('SELLING');
+    });
+
+    it('pending is positive when member overpaid shop (cashGiven > pureValue)', () => {
+      const result = computeGoldPurchase({
+        grossWeight: 5,
+        touchPercent: 80.75,
+        marketRate: 9500,
+        cashGiven: 45000,
+        transactionType: 'SELLING',
+      });
+      // basePending = 38356.25 - 45000 = -6643.75
+      // pending = 6643.75
+      expect(result.pendingAmount.toFixed(2)).toBe('6643.75');
+    });
+
+    it('throws if transactionType is invalid', () => {
+      expect(() => computeGoldPurchase({
+        grossWeight: 5, touchPercent: 80, marketRate: 9500, transactionType: 'INVALID'
+      })).toThrow('transactionType must be BUYING or SELLING');
+    });
+    
+    it('throws if cashGiven is negative', () => {
+      expect(() => computeGoldPurchase({
+        grossWeight: 5, touchPercent: 80, marketRate: 9500, cashGiven: -100
+      })).toThrow('cashGiven must be ≥ 0');
+    });
+  });
 });

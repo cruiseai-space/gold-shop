@@ -1,6 +1,6 @@
 // client/src/features/settings/SettingsPage.jsx
 import { useState } from 'react';
-import { useUsers, useInviteUser, useUpdateUserRole, useSetUserStatus } from './useUsers.js';
+import { useUsers, useInvites, useInviteUser, useUpdateUserRole, useSetUserStatus } from './useUsers.js';
 import { InviteUserModal } from './InviteUserModal.jsx';
 import { useAuth } from '../auth/AuthProvider.jsx';
 import { ROLES } from '../../constants/roles.js';
@@ -13,6 +13,7 @@ export function SettingsPage() {
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   
   const { data: users, isLoading } = useUsers();
+  const { data: invites, isLoading: isLoadingInvites } = useInvites();
   const inviteMutation = useInviteUser();
   const roleMutation = useUpdateUserRole();
   const statusMutation = useSetUserStatus();
@@ -21,7 +22,9 @@ export function SettingsPage() {
     try {
       await inviteMutation.mutateAsync(data);
       setIsInviteModalOpen(false);
-    } catch (e) {}
+    } catch (e) {
+      throw e;
+    }
   };
 
   const handleRoleChange = async (userId, newRole) => {
@@ -119,6 +122,61 @@ export function SettingsPage() {
                           {user.is_active ? 'Deactivate' : 'Reactivate'}
                         </button>
                       )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <h2 className="text-xl font-display font-semibold text-ink">Pending & Past Invites</h2>
+        <div className="bg-surface rounded-lg border border-border shadow-sm overflow-hidden">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-surface-2 text-xs font-semibold uppercase text-ink-muted">
+                <th className="px-4 py-3 border-b border-border">Email</th>
+                <th className="px-4 py-3 border-b border-border">Role</th>
+                <th className="px-4 py-3 border-b border-border">Status</th>
+                <th className="px-4 py-3 border-b border-border">Invited At</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {isLoadingInvites ? (
+                <TableSkeleton rows={2} cols={4} />
+              ) : !invites?.data || invites.data.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="px-4 py-12">
+                    <EmptyState 
+                      icon="✉️"
+                      title="No invites sent"
+                      message="You haven't invited anyone yet."
+                    />
+                  </td>
+                </tr>
+              ) : (
+                invites.data.map((inv) => (
+                  <tr key={inv.id} className="hover:bg-ink/5 transition-colors">
+                    <td className="px-4 py-4">
+                      <p className="font-medium text-ink">{inv.email}</p>
+                      <p className="text-xs text-ink-muted">{inv.full_name}</p>
+                    </td>
+                    <td className="px-4 py-4 text-sm font-semibold text-primary">
+                      {inv.role}
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        inv.status === 'PENDING' ? 'bg-warning-subtle text-warning' :
+                        inv.status === 'ACCEPTED' ? 'bg-success-subtle text-success' :
+                        'bg-danger-subtle text-danger'
+                      }`}>
+                        {inv.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-sm text-ink-muted">
+                      {formatDate(inv.invited_at)}
                     </td>
                   </tr>
                 ))
