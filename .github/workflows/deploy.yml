@@ -12,13 +12,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Deploy Client
-        run: curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK_CLIENT }}"
-
-      - name: Deploy Server
-        run: curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK_SERVER }}"
-
       - name: Run DB Migrations
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
