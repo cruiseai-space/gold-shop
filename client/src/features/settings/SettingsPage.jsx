@@ -19,12 +19,8 @@ export function SettingsPage() {
   const statusMutation = useSetUserStatus();
 
   const handleInvite = async (data) => {
-    try {
-      await inviteMutation.mutateAsync(data);
-      setIsInviteModalOpen(false);
-    } catch (e) {
-      throw e;
-    }
+    await inviteMutation.mutateAsync(data);
+    setIsInviteModalOpen(false);
   };
 
   const handleRoleChange = async (userId, newRole) => {

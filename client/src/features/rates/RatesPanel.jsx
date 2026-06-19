@@ -7,7 +7,7 @@ import { useRates, useTodayRate, useCreateRate } from './useRates.js';
 import { formatCurrency, formatDate } from '../../utils/formatters.js';
 import { useAuth } from '../auth/AuthProvider.jsx';
 import { ROLES } from '../../constants/roles.js';
-import { Skeleton, TableSkeleton } from '../../components/ui/Skeleton.jsx';
+import { TableSkeleton } from '../../components/ui/Skeleton.jsx';
 import { EmptyState } from '../../components/ui/EmptyState.jsx';
 import { Spinner } from '../../components/ui/Spinner.jsx';
 
@@ -20,7 +20,7 @@ const rateSchema = z.object({
 
 export function RatesPanel() {
   const { user } = useAuth();
-  const [filters, setFilters] = useState({ page: 1 });
+  const [filters] = useState({ page: 1 });
   const { data: rates, isLoading: isListLoading } = useRates(filters);
   const { data: todayRate } = useTodayRate();
   const createMutation = useCreateRate();
@@ -38,7 +38,7 @@ export function RatesPanel() {
     try {
       await createMutation.mutateAsync(data);
       reset();
-    } catch (e) {}
+    } catch (e) { /* ignore */ }
   };
 
   return (

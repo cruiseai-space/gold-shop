@@ -1,4 +1,3 @@
-import React from 'react';
 import { Spinner } from './Spinner';
 
 export function FullPageSpinner({ variant = 'gold', message = 'Loading...' }) {

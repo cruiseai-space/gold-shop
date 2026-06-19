@@ -18,4 +18,5 @@ jobs:
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
-          npx supabase db push --project-ref $SUPABASE_PROJECT_REF --password $DB_PASSWORD
+          npx supabase link --project-ref $SUPABASE_PROJECT_REF --password $DB_PASSWORD
+          npx supabase db push --password $DB_PASSWORD

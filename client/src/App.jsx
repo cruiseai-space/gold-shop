@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './features/auth/AuthProvider.jsx';
 import { ProtectedRoute } from './components/layout/ProtectedRoute.jsx';
@@ -17,14 +17,6 @@ const SettingsPage = lazy(() => import('./features/settings/SettingsPage.jsx').t
 const MembersPage = lazy(() => import('./features/members/MembersPage.jsx').then(module => ({ default: module.MembersPage })));
 const MemberDetailPage = lazy(() => import('./features/members/MemberDetailPage.jsx').then(module => ({ default: module.MemberDetailPage })));
 
-function Placeholder({ title }) {
-  return (
-    <div className="p-8 bg-surface rounded-lg border border-border shadow-md text-center">
-      <h1 className="text-2xl text-primary mb-4">{title}</h1>
-      <p className="text-ink-muted italic">Implementation coming soon...</p>
-    </div>
-  );
-}
 
 function App() {
   return (

@@ -1,7 +1,7 @@
 // client/src/features/logs/LogsPage.jsx
 import { useState } from 'react';
 import { useLogs } from './useLogs.js';
-import { formatDate } from '../../utils/formatters.js';
+
 import { TableSkeleton } from '../../components/ui/Skeleton.jsx';
 import { EmptyState } from '../../components/ui/EmptyState.jsx';
 
