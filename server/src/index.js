@@ -27,6 +27,11 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date() });
 });
 
+// Root friendly message
+app.get('/', (req, res) => {
+  res.json({ message: 'Swarna Ledger API is running beautifully!', version: '1.0.0' });
+});
+
 // Rate limit password reset endpoints
 const passwordResetLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
